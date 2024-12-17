@@ -5,7 +5,7 @@ import TextInput from "@/Components/TextInput";
 import { TASK_STATUS_CLASS_MAP, TASK_STATUS_TEXT_MAP } from "@/constants";
 import { Link, router } from "@inertiajs/react";
 
-export default function TasksTable({tasks, queryParams = null, hideProjectColumn = false}) {
+export default function TasksTable({tasks, success, queryParams = null, hideProjectColumn = false}) {
     queryParams = queryParams || {}
 
     const searchFieldChanged = (name, value) => {
@@ -38,8 +38,17 @@ export default function TasksTable({tasks, queryParams = null, hideProjectColumn
         router.get(route('task.index'), queryParams)
     }
 
+    const deleteTask = (task) => {
+        if (!window.confirm('Are you sure you want to delete the task?')) {
+            return 
+        }
+
+        router.delete(route('task.destroy', task.id))
+    }
+
     return (
         <>
+            {success && (<div className="bg-emerald-500 py-2 px-4 text-white rounded">{success}</div>)}
             <div className="overflow-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
@@ -138,7 +147,7 @@ export default function TasksTable({tasks, queryParams = null, hideProjectColumn
                                     <img src={task.image_path} style={{ width:60 }} />
                                 </td>
                                 {!hideProjectColumn && (
-                                    <td className="px-3 py-3">{task.project ? task.project.name : 'No Project'}</td>
+                                    <td className="px-3 py-3">{task.project.name}</td>
                                 )}
                                 <td className="px-3 py-3">{task.name}</td>
                                 <td className="px-3 py-3">
@@ -159,12 +168,13 @@ export default function TasksTable({tasks, queryParams = null, hideProjectColumn
                                     >
                                         Edit
                                     </Link>
-                                    <Link 
+                                    <button 
+                                        onClick={e => deleteTask(task)}
                                         href={route('task.destroy', task.id)}
                                         className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
                                     >
                                         Delete
-                                    </Link>
+                                    </button>
                                 </td>
                             </tr>
                         ))}
